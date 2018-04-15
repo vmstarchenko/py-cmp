@@ -4,7 +4,7 @@ def fib(a):
     return fib(a - 1) + fib(a - 2)
 
 def main():
-    fib(30)
+    print(fib(30))
 
 if __name__ == "__main__":
     main()

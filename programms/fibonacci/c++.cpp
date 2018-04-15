@@ -8,6 +8,6 @@ int fib(int a) {
 
 
 int main() {
-    fib(30);
+    std::cout << fib(30) << std::endl;
     return 0;
 }

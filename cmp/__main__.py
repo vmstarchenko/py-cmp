@@ -64,6 +64,7 @@ def run(path, settings):
         compiler = executers[executer].get('compile', None)
         if compiler is not None:
             command = compiler + [program, ]
+            # print(' '.join(command))
             sp.call(command, stdout=sp.DEVNULL)
 
     heapq.heapify(queue)
@@ -71,9 +72,10 @@ def run(path, settings):
     results = []
 
     while queue:
-        cur_time, executer, path, iters = heapq.heappop(queue)
-        command = executers[executer]['start'] + [path]
+        cur_time, executer, program_path, iters = heapq.heappop(queue)
+        command = executers[executer]['start'] + [program_path]
 
+        # print(' '.join(command))
         start_time = time()
         sp.call(command, stdout=sp.DEVNULL)
         end_time = time()
@@ -84,10 +86,12 @@ def run(path, settings):
             results.append((cur_time / iters, executer))
             continue
 
-        heapq.heappush(queue, [cur_time, executer, path, iters])
+        heapq.heappush(queue, [cur_time, executer, program_path, iters])
 
     results.sort()
-    pprint(results)
+    return {
+        'program': os.path.basename(path),
+        'results': results}
 
 
 def main():
@@ -103,7 +107,7 @@ def main():
     settings.setdefault('build_dir', build_dir)
 
     for programm in programms:
-        run(programm, settings)
+        pprint(run(programm, settings))
 
 
 if __name__ == '__main__':

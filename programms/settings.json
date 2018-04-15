@@ -9,6 +9,10 @@
     "c++": {
       "compile": ["g++", "-O3", "-o", "%(build)s/a.out"],
       "start": ["%(build)s/a.out"]
+    },
+    "java": {
+      "compile": ["javac", "-d", "%(build)s/"],
+      "start": ["java", "-cp", "%(build)s", "java"]
     }
   }
 }
