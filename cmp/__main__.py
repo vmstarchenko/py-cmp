@@ -76,15 +76,18 @@ def run(path, settings, executors, skipped_executors):
         if executor in skipped_executors:
             continue
         if executor not in executors:
-            raise ValueError('executor %s not fount' %executor)
+            raise ValueError('executor %s not found' %executor)
 
         queue.append([0, executor, program, 0])
 
         compiler = executors[executor].get('compile', None)
         if compiler is not None:
-            command = compiler + [program, ]
+            command = fill_variables(compiler, {'name': program})
+            if compiler == command:
+                command = command + [program, ]
+
             # print(' '.join(command))
-            sp.call(command, stdout=sp.DEVNULL)
+            sp.call(command, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
 
     heapq.heapify(queue)
 
@@ -126,6 +129,7 @@ def main():
 
     executors = get_executors(settings, {
         'build': settings['build_dir'],
+        'name': '%(name)s',
     })
     skipped_executors = check_executors(executors)
 
@@ -134,5 +138,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # print(a)
     main()

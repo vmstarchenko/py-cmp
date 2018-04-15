@@ -9,12 +9,21 @@
     "c++": {
       "compile": ["g++", "-O3", "-o", "%(build)s/a.out"],
       "start": ["%(build)s/a.out"],
-      "requirements": ["g++"]
+      "requirements": "g++"
     },
     "java": {
       "compile": ["javac", "-d", "%(build)s/"],
       "start": ["java", "-cp", "%(build)s", "java"],
       "requirements": ["javac", "java"]
+    },
+    "lisp": {
+      "start": ["sbcl", "--script"],
+      "requirements": "sbcl"
+    },
+    "clisp": {
+      "compile": ["clisp", "-c", "-l", "%(name)s", "-o", "%(build)s/lisp"],
+      "start": ["clisp", "%(build)s/lisp.fas"],
+      "requirements": "clisp"
     }
   }
 }
