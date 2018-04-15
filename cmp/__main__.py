@@ -33,23 +33,23 @@ def fill_variables(obj, variables):
         raise ValueError('cant fill variables (unknown object type)')
 
 
-def get_executers(settings, variables):
-    executers = {}
-    for name, value in settings['executers'].items():
+def get_executors(settings, variables):
+    executors = {}
+    for name, value in settings['executors'].items():
         if isinstance(value, (str, list,)):
             value = {'start': value}
 
         if isinstance(value['start'], str):
             value['start'] = [value['start'], ]
 
-        executers[name] = value
-    return fill_variables(executers, variables)
+        executors[name] = value
+    return fill_variables(executors, variables)
 
 
 def run(path, settings):
     average_time = settings['average_time']
     time_limit = settings['time_limit']
-    executers = get_executers(settings, {
+    executors = get_executors(settings, {
         'build': settings['build_dir'],
     })
 
@@ -57,11 +57,11 @@ def run(path, settings):
 
     queue = []
     for program in programms:
-        executer = program.rsplit('.', 1)[0]
+        executor = program.rsplit('.', 1)[0]
         program = os.path.join(path, program)
-        queue.append([0, executer, program, 0])
+        queue.append([0, executor, program, 0])
 
-        compiler = executers[executer].get('compile', None)
+        compiler = executors[executor].get('compile', None)
         if compiler is not None:
             command = compiler + [program, ]
             # print(' '.join(command))
@@ -72,8 +72,8 @@ def run(path, settings):
     results = []
 
     while queue:
-        cur_time, executer, program_path, iters = heapq.heappop(queue)
-        command = executers[executer]['start'] + [program_path]
+        cur_time, executor, program_path, iters = heapq.heappop(queue)
+        command = executors[executor]['start'] + [program_path]
 
         # print(' '.join(command))
         start_time = time()
@@ -83,10 +83,10 @@ def run(path, settings):
         iters += 1
 
         if cur_time >= average_time:
-            results.append((cur_time / iters, executer))
+            results.append((cur_time / iters, executor))
             continue
 
-        heapq.heappush(queue, [cur_time, executer, program_path, iters])
+        heapq.heappush(queue, [cur_time, executor, program_path, iters])
 
     results.sort()
     return {

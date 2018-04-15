@@ -1,7 +1,7 @@
 {
   "time_limit": 5.0,
   "average_time": 1,
-  "executers": {
+  "executors": {
     "python": "python",
     "python2": "python2",
     "ipython": "ipython",
