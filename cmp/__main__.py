@@ -6,7 +6,7 @@ import heapq
 from time import time
 import subprocess as sp
 from pprint import pprint
-
+import logging
 
 def read_settings(path):
     with open(path) as settings_file:
@@ -36,22 +36,35 @@ def fill_variables(obj, variables):
 def get_executors(settings, variables):
     executors = {}
     for name, value in settings['executors'].items():
-        if isinstance(value, (str, list,)):
-            value = {'start': value}
+        if isinstance(value, str):
+            value = {'start': value, 'requirements': value}
+        if isinstance(value, list):
+            value = {'start': value, 'requirements': value[0]}
 
         if isinstance(value['start'], str):
             value['start'] = [value['start'], ]
+        if isinstance(value['requirements'], str):
+            value['requirements'] = [value['requirements'], ]
 
         executors[name] = value
     return fill_variables(executors, variables)
 
+def check_executors(executors):
+    failed = set()
+    for executor, settings in executors.items():
+        for req in settings['requirements']:
+            try:
+                sp.call([req, '--help'], stderr=sp.DEVNULL, stdout=sp.DEVNULL)
+            except FileNotFoundError:
+                failed.add(executor)
+                logging.warning(
+                    'command %r not fount (%s would be skipped)',
+                    req, executor)
+    return failed
 
-def run(path, settings):
+def run(path, settings, executors, skipped_executors):
     average_time = settings['average_time']
     time_limit = settings['time_limit']
-    executors = get_executors(settings, {
-        'build': settings['build_dir'],
-    })
 
     programms = os.listdir(path)
 
@@ -59,6 +72,12 @@ def run(path, settings):
     for program in programms:
         executor = program.rsplit('.', 1)[0]
         program = os.path.join(path, program)
+
+        if executor in skipped_executors:
+            continue
+        if executor not in executors:
+            raise ValueError('executor %s not fount' %executor)
+
         queue.append([0, executor, program, 0])
 
         compiler = executors[executor].get('compile', None)
@@ -93,7 +112,6 @@ def run(path, settings):
         'program': os.path.basename(path),
         'results': results}
 
-
 def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     programms_dir = os.path.join(base_dir, 'programms')
@@ -106,9 +124,15 @@ def main():
     settings = read_settings(os.path.join(programms_dir, 'settings.json'))
     settings.setdefault('build_dir', build_dir)
 
+    executors = get_executors(settings, {
+        'build': settings['build_dir'],
+    })
+    skipped_executors = check_executors(executors)
+
     for programm in programms:
-        pprint(run(programm, settings))
+        pprint(run(programm, settings, executors, skipped_executors))
 
 
 if __name__ == '__main__':
+    # print(a)
     main()

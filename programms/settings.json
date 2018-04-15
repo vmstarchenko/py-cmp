@@ -5,14 +5,16 @@
     "python": "python",
     "python2": "python2",
     "ipython": "ipython",
-    "pypy": "python",
+    "pypy": "pypy",
     "c++": {
       "compile": ["g++", "-O3", "-o", "%(build)s/a.out"],
-      "start": ["%(build)s/a.out"]
+      "start": ["%(build)s/a.out"],
+      "requirements": ["g++"]
     },
     "java": {
       "compile": ["javac", "-d", "%(build)s/"],
-      "start": ["java", "-cp", "%(build)s", "java"]
+      "start": ["java", "-cp", "%(build)s", "java"],
+      "requirements": ["javac", "java"]
     }
   }
 }
