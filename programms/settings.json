@@ -1,0 +1,14 @@
+{
+  "time_limit": 5.0,
+  "average_time": 1,
+  "executers": {
+    "python": "python",
+    "python2": "python2",
+    "ipython": "ipython",
+    "pypy": "python",
+    "c++": {
+      "compile": ["g++", "-O3", "-o", "%(build)s/a.out"],
+      "start": ["%(build)s/a.out"]
+    }
+  }
+}
