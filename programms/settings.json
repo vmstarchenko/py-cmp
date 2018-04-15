@@ -4,7 +4,6 @@
   "executors": {
     "python": "python",
     "python2": "python2",
-    "ipython": "ipython",
     "pypy": "pypy",
     "c++": {
       "compile": ["g++", "-O3", "-o", "%(build)s/a.out"],

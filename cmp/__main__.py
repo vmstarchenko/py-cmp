@@ -58,7 +58,7 @@ def check_executors(executors):
             except FileNotFoundError:
                 failed.add(executor)
                 logging.warning(
-                    'command %r not fount (%s would be skipped)',
+                    'command %r not found (%s would be skipped)',
                     req, executor)
     return failed
 
@@ -76,7 +76,8 @@ def run(path, settings, executors, skipped_executors):
         if executor in skipped_executors:
             continue
         if executor not in executors:
-            raise ValueError('executor %s not found' %executor)
+            logging.warning('executor %s not found' %executor)
+            continue
 
         queue.append([0, executor, program, 0])
 
@@ -87,7 +88,10 @@ def run(path, settings, executors, skipped_executors):
                 command = command + [program, ]
 
             # print(' '.join(command))
-            sp.call(command, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+            status = sp.call(command, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+            if status:
+                sp.call(command)
+                return
 
     heapq.heapify(queue)
 
@@ -105,7 +109,7 @@ def run(path, settings, executors, skipped_executors):
         iters += 1
 
         if cur_time >= average_time:
-            results.append((cur_time / iters, executor))
+            results.append((executor, cur_time / iters))
             continue
 
         heapq.heappush(queue, [cur_time, executor, program_path, iters])
@@ -113,7 +117,7 @@ def run(path, settings, executors, skipped_executors):
     results.sort()
     return {
         'program': os.path.basename(path),
-        'results': results}
+        'data': results}
 
 def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -133,8 +137,14 @@ def main():
     })
     skipped_executors = check_executors(executors)
 
+    results = []
     for programm in programms:
-        pprint(run(programm, settings, executors, skipped_executors))
+        result = run(programm, settings, executors, skipped_executors)
+        if result is None:
+            break
+        pprint(result)
+        results.append(result)
+    return results
 
 
 if __name__ == '__main__':
