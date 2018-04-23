@@ -5,23 +5,48 @@
     "python": "python",
     "python2": "python2",
     "pypy": "pypy",
+
+    "cython": {
+      "compile": [
+        ["cp", "%(name)s", "%(build)s/program.pyx"],
+        ["python", "-m", "cython", "-o", "%(build)s/program.c", "--embed", "%(build)s/program.pyx", ";"],
+        ["gcc", "-O3", "-o", "%(build)s/cython.out", "%(build)s/program.c", "-I/usr/include/python3.6m", "-lpython3.6m", ";"]
+      ],
+      "start": "%(build)s/cython.out",
+      "requirements": [["python", "-m", "cython"]]
+    },
+    "cython_with_types": {
+      "compile": [
+        ["cp", "%(name)s", "%(build)s/program.pyx"],
+        ["python", "-m", "cython", "-o", "%(build)s/program.c", "--embed", "%(build)s/program.pyx", ";"],
+        ["gcc", "-O3", "-o", "%(build)s/cython_with_types.out", "%(build)s/program.c", "-I/usr/include/python3.6m", "-lpython3.6m", ";"]
+      ],
+      "start": "%(build)s/cython_with_types.out",
+      "requirements": [["python", "-m", "cython"]]
+    },
+
+    "nuitka": {
+      "compile": [["python", "-m", "nuitka", "--output-dir=%(build)s/", "--remove-output", "--recurse-all"]],
+      "start": "%(build)s/nuitka.exe",
+      "requirements": [["python", "-m", "nuitka"]]
+    },
     "c++": {
-      "compile": ["g++", "-O3", "-o", "%(build)s/a.out"],
-      "start": ["%(build)s/a.out"],
+      "compile": [["g++", "-O3", "-o", "%(build)s/cpp.out"]],
+      "start": "%(build)s/cpp.out",
       "requirements": "g++"
     },
     "java": {
-      "compile": ["javac", "-d", "%(build)s/"],
-      "start": ["java", "-cp", "%(build)s", "java"],
+      "compile": [["javac", "-d", "%(build)s/"]],
+      "start": [["java", "-cp", "%(build)s", "java"]],
       "requirements": ["javac", "java"]
     },
     "lisp": {
-      "start": ["sbcl", "--script"],
+      "start": [["sbcl", "--script"]],
       "requirements": "sbcl"
     },
     "clisp": {
-      "compile": ["clisp", "-c", "-l", "%(name)s", "-o", "%(build)s/lisp"],
-      "start": ["clisp", "%(build)s/lisp.fas"],
+      "compile": [["clisp", "-c", "-l", "%(name)s", "-o", "%(build)s/lisp"]],
+      "start": [["clisp", "%(build)s/lisp.fas"]],
       "requirements": "clisp"
     }
   }
