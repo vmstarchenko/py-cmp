@@ -1,5 +1,5 @@
-from .__main__ import main
+from .__main__ import main, run_programs
 
 __all__ = [
-    'main'
+    'main', 'run_programs',
 ]

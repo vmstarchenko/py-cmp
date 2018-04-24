@@ -1,0 +1,10 @@
+(defun main()
+  (let ((s 0)
+        (last (parse-integer (second *posix-argv*))))
+    (dotimes (i last)
+      (setf s (+ s i))
+      (if (> s 1000000000)
+          (setf s 0)))
+    (print s)))
+
+(main)

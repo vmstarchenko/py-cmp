@@ -2,9 +2,15 @@
   "time_limit": 5.0,
   "average_time": 1,
   "executors": {
-    "python": "python",
-    "python2": "python2",
-    "pypy": "pypy",
+    "python": {
+      "start": [["python", "%(name)s"]]
+    },
+    "python2": {
+      "start": [["python2", "%(name)s"]]
+    },
+    "pypy2": {
+      "start": [["python2", "%(name)s"]]
+    },
 
     "cython": {
       "compile": [
@@ -41,7 +47,7 @@
       "requirements": ["javac", "java"]
     },
     "lisp": {
-      "start": [["sbcl", "--script"]],
+      "start": [["sbcl", "--script", "%(name)s"]],
       "requirements": "sbcl"
     },
     "clisp": {

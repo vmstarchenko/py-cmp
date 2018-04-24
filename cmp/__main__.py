@@ -7,18 +7,22 @@ from time import time
 import subprocess as sp
 from pprint import pprint
 import logging
+from copy import deepcopy
 
 
 def read_settings(path):
+    if not os.path.exists(path):
+        return {}
+
     with open(path) as settings_file:
         text = settings_file.read()
 
     return json.loads(text, object_pairs_hook=OrderedDict)
 
 
-def get_programms(path):
-    programms = [os.path.join(path, programm) for programm in os.listdir(path)]
-    return list(filter(os.path.isdir, programms))
+def get_programs(path):
+    programs = [os.path.join(path, program) for program in os.listdir(path)]
+    return list(filter(os.path.isdir, programs))
 
 
 def fill_variables(obj, variables):
@@ -35,10 +39,10 @@ def fill_variables(obj, variables):
 
 
 def unwrap_commands(commands):
-    if isinstance(commands, str):
+    if isinstance(commands, (str, int)):
         commands = [[commands], ]
     return [
-        [cmd] if isinstance(cmd, str) else list(cmd)
+        [str(cmd)] if isinstance(cmd, (str, int)) else list(map(str, cmd))
         for cmd in commands
     ]
 
@@ -79,21 +83,29 @@ def check_executors(executors):
 def run(path, settings, executors, skipped_executors):
     average_time = settings['average_time']
     time_limit = settings['time_limit']
+    args = settings['args']
+    if not args:
+        args = [[]]
 
-    programms = os.listdir(path)
+    programs = os.listdir(path)
 
     queue = []
-    for program in programms:
+    for program in programs:
         executor = program.rsplit('.', 1)[0]
         program = os.path.join(path, program)
 
-        if executor in skipped_executors:
+        if (executor in skipped_executors or
+                os.path.basename(program) == 'settings.json'):
             continue
         if executor not in executors:
             logging.warning('executor %s not found' % executor)
             continue
 
-        queue.append([0, executor, program, 0])
+        executors[executor]['start'] = fill_variables(
+            executors[executor]['start'], {'name': program})
+
+        for arg in args:
+            queue.append([0, executor, program, 0, arg])
 
         compiler = executors[executor].get('compile', None)
         if compiler is not None:
@@ -119,25 +131,26 @@ def run(path, settings, executors, skipped_executors):
     results = []
 
     while queue:
-        cur_time, executor, program_path, iters = heapq.heappop(queue)
+        cur_time, executor, program_path, iters, arg = heapq.heappop(queue)
         commands = executors[executor]['start']
-
-
 
         # print(' '.join(command))
         for command in commands:
-            command = command + [program_path]
+            command = command + arg
             start_time = time()
-            sp.call(command, stdout=sp.DEVNULL)
+            status = sp.call(command, stdout=sp.DEVNULL)
             end_time = time()
+            if status:
+                raise ValueError('non zero exit program code %r' %
+                                 ' '.join(command))
             cur_time += end_time - start_time
         iters += 1
 
         if cur_time >= average_time:
-            results.append((executor, cur_time / iters))
+            results.append((executor, cur_time / iters, arg))
             continue
 
-        heapq.heappush(queue, [cur_time, executor, program_path, iters])
+        heapq.heappush(queue, [cur_time, executor, program_path, iters, arg])
 
     results.sort()
     return {
@@ -145,32 +158,48 @@ def run(path, settings, executors, skipped_executors):
         'data': results}
 
 
-def main():
+def run_programs(programs=None):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    programms_dir = os.path.join(base_dir, 'programms')
+    programs_dir = os.path.join(base_dir, 'programs')
 
     build_dir = os.path.join(base_dir, 'build')
     os.makedirs(build_dir, exist_ok=True)
 
-    programms = get_programms(programms_dir)
+    all_programs = get_programs(programs_dir)
 
-    settings = read_settings(os.path.join(programms_dir, 'settings.json'))
-    settings.setdefault('build_dir', build_dir)
+    global_settings = read_settings(
+        os.path.join(programs_dir, 'settings.json'))
+    global_settings.setdefault('build_dir', build_dir)
 
-    executors = get_executors(settings, {
-        'build': settings['build_dir'],
+    executors = get_executors(global_settings, {
+        'build': global_settings['build_dir'],
         'name': '%(name)s',
     })
     skipped_executors = check_executors(executors)
 
     results = []
-    for programm in programms:
-        result = run(programm, settings, executors, skipped_executors)
+    for program in all_programs:
+        if programs is not None and os.path.basename(program) not in programs:
+            continue
+
+        local_settings = read_settings(
+            os.path.join(program, 'settings.json'))
+        local_settings['args'] = unwrap_commands(
+            local_settings.get('args', []))
+
+        settings = deepcopy(global_settings)
+        settings.update(local_settings)
+
+        result = run(program, settings, executors, skipped_executors)
         if result is None:
             break
         pprint(result)
         results.append(result)
     return results
+
+
+def main():
+    run_programs(['sum'])
 
 
 if __name__ == '__main__':
