@@ -1,59 +1,62 @@
 {
   "time_limit": 5.0,
-  "average_time": 1,
+  "exec_time": 5,
   "executors": {
     "python": {
-      "start": [["python", "%(name)s"]]
+      "start": [["python", "${name}", "${args}"]],
+      "requirements": [["python", "--help"]]
     },
     "python2": {
-      "start": [["python2", "%(name)s"]]
+      "start": [["python2", "${name}", "${args}"]],
+      "requirements": [["python2", "--help"]]
     },
     "pypy2": {
-      "start": [["python2", "%(name)s"]]
+      "start": [["pypy", "${name}", "${args}"]],
+      "requirements": [["pypy", "--help"]]
     },
 
     "cython": {
       "compile": [
-        ["cp", "%(name)s", "%(build)s/program.pyx"],
-        ["python", "-m", "cython", "-o", "%(build)s/program.c", "--embed", "%(build)s/program.pyx", ";"],
-        ["gcc", "-O3", "-o", "%(build)s/cython.out", "%(build)s/program.c", "-I/usr/include/python3.6m", "-lpython3.6m", ";"]
-      ],
-      "start": "%(build)s/cython.out",
-      "requirements": [["python", "-m", "cython"]]
+        ["cp", "${name}", "${build}/program.pyx"],
+        ["python", "-m", "cython", "-o", "${build}/program.c", "--embed", "${build}/program.pyx"],
+        ["gcc", "-O3", "-o", "${build}/cython.out", "${build}/program.c", "-I/usr/include/python3.6m", "-lpython3.6m"]],
+      "start": [["${build}/cython.out", "${args}"]],
+      "requirements": [["python", "-m", "cython", "--help"]]
     },
     "cython_with_types": {
       "compile": [
-        ["cp", "%(name)s", "%(build)s/program.pyx"],
-        ["python", "-m", "cython", "-o", "%(build)s/program.c", "--embed", "%(build)s/program.pyx", ";"],
-        ["gcc", "-O3", "-o", "%(build)s/cython_with_types.out", "%(build)s/program.c", "-I/usr/include/python3.6m", "-lpython3.6m", ";"]
-      ],
-      "start": "%(build)s/cython_with_types.out",
-      "requirements": [["python", "-m", "cython"]]
+        ["cp", "${name}", "${build}/program.pyx"],
+        ["python", "-m", "cython", "-o", "${build}/program.c", "--embed", "${build}/program.pyx"],
+        ["gcc", "-O3", "-o", "${build}/cython_with_types.out", "${build}/program.c", "-I/usr/include/python3.6m", "-lpython3.6m"]],
+      "start": [["${build}/cython_with_types.out", "${args}"]],
+      "requirements": [["python", "-m", "cython", "--help"]]
     },
 
     "nuitka": {
-      "compile": [["python", "-m", "nuitka", "--output-dir=%(build)s/", "--remove-output", "--recurse-all"]],
-      "start": "%(build)s/nuitka.exe",
-      "requirements": [["python", "-m", "nuitka"]]
+      "compile": [["python", "-m", "nuitka", "--output-dir=${build}/", "--remove-output", "--recurse-all", "${name}"]],
+      "start": [["${build}/nuitka.exe", "${args}"]],
+      "requirements": [["python", "-m", "nuitka", "--help"]]
     },
     "c++": {
-      "compile": [["g++", "-O3", "-o", "%(build)s/cpp.out"]],
-      "start": "%(build)s/cpp.out",
-      "requirements": "g++"
+      "compile": [["g++", "-O3", "-o", "${build}/cpp.out", "${name}"]],
+      "start": [["${build}/cpp.out", "${args}"]],
+      "requirements": [["g++", "--help"]]
     },
     "java": {
-      "compile": [["javac", "-d", "%(build)s/"]],
-      "start": [["java", "-cp", "%(build)s", "java"]],
-      "requirements": ["javac", "java"]
+      "compile": [["javac", "-d", "${build}/", "${name}"]],
+      "start": [["java", "-cp", "${build}", "java", "${args}"]],
+      "requirements": [
+        ["javac", "--help"],
+        ["java", "--help"]]
     },
     "lisp": {
-      "start": [["sbcl", "--script", "%(name)s"]],
-      "requirements": "sbcl"
+      "start": [["sbcl", "--script", "${name}", "${args}"]],
+      "requirements": [["sbcl", "--help"]]
     },
     "clisp": {
-      "compile": [["clisp", "-c", "-l", "%(name)s", "-o", "%(build)s/lisp"]],
-      "start": [["clisp", "%(build)s/lisp.fas"]],
-      "requirements": "clisp"
+      "compile": [["clisp", "-c", "-l", "${name}", "-o", "${build}/lisp"]],
+      "start": [["clisp", "${build}/lisp.fas", "${args}"]],
+      "requirements": [["clisp", "--help"]]
     }
   }
 }
