@@ -9,4 +9,6 @@ python cmp
 
 ![fibonacci](etc/img/fibonacci.png)
 
-![sum](etc/img/sum.png)
+![sum](etc/img/sum-0.png)
+
+![sum](etc/img/sum-1.png)

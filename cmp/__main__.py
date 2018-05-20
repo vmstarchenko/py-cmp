@@ -275,7 +275,7 @@ def run_programs(programs=None, executors=None, skipped_executors=None):
 
 
 def main():
-    run_programs(['sum'], executors=['java', 'c++', 'python'])
+    run_programs(['sum'], executors=['java', 'c++', 'node-js'])
 
 
 if __name__ == '__main__':

@@ -3,19 +3,23 @@
   "exec_time": 5,
   "executors": {
     "python": {
+      "lang": "python",
       "start": [["python", "${name}", "${args}"]],
       "requirements": [["python", "--help"]]
     },
     "python2": {
+      "lang": "python",
       "start": [["python2", "${name}", "${args}"]],
       "requirements": [["python2", "--help"]]
     },
     "pypy2": {
+      "lang": "python",
       "start": [["pypy", "${name}", "${args}"]],
       "requirements": [["pypy", "--help"]]
     },
 
     "cython": {
+      "lang": "python",
       "compile": [
         ["cp", "${name}", "${build}/program.pyx"],
         ["python", "-m", "cython", "-o", "${build}/program.c", "--embed", "${build}/program.pyx"],
@@ -24,6 +28,7 @@
       "requirements": [["python", "-m", "cython", "--help"]]
     },
     "cython_with_types": {
+      "lang": "cython",
       "compile": [
         ["cp", "${name}", "${build}/program.pyx"],
         ["python", "-m", "cython", "-o", "${build}/program.c", "--embed", "${build}/program.pyx"],
@@ -33,16 +38,19 @@
     },
 
     "nuitka": {
+      "lang": "python",
       "compile": [["python", "-m", "nuitka", "--output-dir=${build}/", "--remove-output", "--recurse-all", "${name}"]],
       "start": [["${build}/nuitka.exe", "${args}"]],
       "requirements": [["python", "-m", "nuitka", "--help"]]
     },
     "c++": {
+      "lang": "c++",
       "compile": [["g++", "-O3", "-o", "${build}/cpp.out", "${name}"]],
       "start": [["${build}/cpp.out", "${args}"]],
       "requirements": [["g++", "--help"]]
     },
     "java": {
+      "lang": "java",
       "compile": [["javac", "-d", "${build}/", "${name}"]],
       "start": [["java", "-cp", "${build}", "java", "${args}"]],
       "requirements": [
@@ -50,13 +58,20 @@
         ["java", "--help"]]
     },
     "lisp": {
+      "lang": "lisp",
       "start": [["sbcl", "--script", "${name}", "${args}"]],
       "requirements": [["sbcl", "--help"]]
     },
     "clisp": {
+      "lang": "lisp",
       "compile": [["clisp", "-c", "-l", "${name}", "-o", "${build}/lisp"]],
       "start": [["clisp", "${build}/lisp.fas", "${args}"]],
       "requirements": [["clisp", "--help"]]
+    },
+    "node-js": {
+      "lang": "javascript",
+      "start": [["nodejs", "${name}", "${args}"]],
+      "requirements": [["nodejs", "--help"]]
     }
   }
 }
