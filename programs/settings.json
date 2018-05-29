@@ -49,6 +49,12 @@
       "start": [["${build}/cpp.out", "${args}"]],
       "requirements": [["g++", "--help"]]
     },
+    "rust": {
+      "lang": "rust",
+      "compile": [["rustc", "-C", "opt-level=3", "-o", "${build}/rust.out", "${name}"]],
+      "start": [["${build}/rust.out", "${args}"]],
+      "requirements": [["rustc", "--help"]]
+    },
     "java": {
       "lang": "java",
       "compile": [["javac", "-d", "${build}/", "${name}"]],
